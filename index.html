@@ -7,64 +7,105 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #1e293b;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
         }
-        form {
-            margin-bottom: 20px;
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #0f172a;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #38bdf8;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        .form-container {
+            margin-top: 20px;
+            display: none;
+            background-color: #334155;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .form-container.active {
+            display: block;
         }
         label {
             display: block;
             margin: 10px 0 5px;
+            font-weight: bold;
+            color: #f0fdf4;
         }
-        input, button {
-            padding: 10px;
-            margin-bottom: 10px;
+        input, button, select {
             width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
             box-sizing: border-box;
+            font-size: 1rem;
         }
-        .permissions {
-            margin: 10px 0;
+        input, select {
+            background-color: #475569;
+            color: #ffffff;
+        }
+        button {
+            background-color: #38bdf8;
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0284c7;
         }
         .permissions label {
             display: inline-block;
             margin-right: 10px;
         }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
         .result {
             margin-top: 20px;
             padding: 10px;
-            background-color: #e7f4e4;
-            border: 1px solid #bcd9bc;
-        }
-        .section {
-            margin-bottom: 30px;
+            background-color: #22c55e;
+            color: #0f172a;
+            font-weight: bold;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Telegram Bot API Tool</h1>
+    <header>
+        <h1>Telegram Bot API Tool</h1>
+    </header>
+    <main>
+        <label for="functionSelect">Choose a Function:</label>
+        <select id="functionSelect" onchange="showForm()">
+            <option value="">Select a Function</option>
+            <option value="promote">Promote User</option>
+            <option value="ban">Ban User</option>
+            <option value="unban">Unban User</option>
+            <option value="delete">Delete Message</option>
+        </select>
 
-    <div class="section">
-        <h2>Promote User with Permissions</h2>
-        <form id="promoteForm">
+        <div id="promoteForm" class="form-container">
+            <h2>Promote User</h2>
             <label for="promoteToken">Bot Token:</label>
             <input type="text" id="promoteToken" placeholder="Enter Bot Token" required>
-
+            
             <label for="promoteChatId">Chat ID:</label>
             <input type="text" id="promoteChatId" placeholder="Enter Chat ID" required>
-
+            
             <label for="promoteUserId">User ID:</label>
             <input type="text" id="promoteUserId" placeholder="Enter User ID" required>
-
+            
             <label>Admin Permissions:</label>
             <div class="permissions">
                 <label><input type="checkbox" id="manageChat" checked> Manage Chat</label>
@@ -77,50 +118,69 @@
                 <label><input type="checkbox" id="inviteUsers" checked> Invite Users</label>
                 <label><input type="checkbox" id="isAnonymous"> Is Anonymous</label>
             </div>
-
-            <label for="customTitle">Custom Admin Title (if needed):</label>
+            
+            <label for="customTitle">Custom Admin Title (Optional):</label>
             <input type="text" id="customTitle" placeholder="Enter Admin Title">
-
+            
             <button type="button" onclick="processPromote()">Promote User</button>
-        </form>
-    </div>
+        </div>
 
-    <div class="section">
-        <h2>Ban or Unban User</h2>
-        <form id="banForm">
+        <div id="banForm" class="form-container">
+            <h2>Ban User</h2>
             <label for="banToken">Bot Token:</label>
             <input type="text" id="banToken" placeholder="Enter Bot Token" required>
-
+            
             <label for="banChatId">Chat ID:</label>
             <input type="text" id="banChatId" placeholder="Enter Chat ID" required>
-
+            
             <label for="banUserId">User ID:</label>
             <input type="text" id="banUserId" placeholder="Enter User ID" required>
-
+            
             <button type="button" onclick="processBan()">Ban User</button>
-            <button type="button" onclick="processUnban()">Unban User</button>
-        </form>
-    </div>
+        </div>
 
-    <div class="section">
-        <h2>Delete a Message</h2>
-        <form id="deleteForm">
+        <div id="unbanForm" class="form-container">
+            <h2>Unban User</h2>
+            <label for="unbanToken">Bot Token:</label>
+            <input type="text" id="unbanToken" placeholder="Enter Bot Token" required>
+            
+            <label for="unbanChatId">Chat ID:</label>
+            <input type="text" id="unbanChatId" placeholder="Enter Chat ID" required>
+            
+            <label for="unbanUserId">User ID:</label>
+            <input type="text" id="unbanUserId" placeholder="Enter User ID" required>
+            
+            <button type="button" onclick="processUnban()">Unban User</button>
+        </div>
+
+        <div id="deleteForm" class="form-container">
+            <h2>Delete Message</h2>
             <label for="deleteToken">Bot Token:</label>
             <input type="text" id="deleteToken" placeholder="Enter Bot Token" required>
-
+            
             <label for="deleteChatId">Chat ID:</label>
             <input type="text" id="deleteChatId" placeholder="Enter Chat ID" required>
-
+            
             <label for="messageId">Message ID:</label>
             <input type="text" id="messageId" placeholder="Enter Message ID" required>
-
+            
             <button type="button" onclick="processDelete()">Delete Message</button>
-        </form>
-    </div>
+        </div>
 
-    <div id="result" class="result" style="display:none;"></div>
+        <div id="result" class="result" style="display:none;"></div>
+    </main>
 
     <script>
+        function showForm() {
+            const forms = document.querySelectorAll('.form-container');
+            forms.forEach(form => form.classList.remove('active'));
+
+            const selectedFunction = document.getElementById('functionSelect').value;
+            if (selectedFunction) {
+                document.getElementById(`${selectedFunction}Form`).classList.add('active');
+            }
+        }
+
         async function processPromote() {
             const token = document.getElementById('promoteToken').value;
             const chatId = document.getElementById('promoteChatId').value;
@@ -157,15 +217,17 @@
             const userId = document.getElementById('banUserId').value;
 
             const url = `https://api.telegram.org/bot${token}/banChatMember?chat_id=${chatId}&user_id=${userId}`;
+
             await sendRequest(url);
         }
 
         async function processUnban() {
-            const token = document.getElementById('banToken').value;
-            const chatId = document.getElementById('banChatId').value;
-            const userId = document.getElementById('banUserId').value;
+            const token = document.getElementById('unbanToken').value;
+            const chatId = document.getElementById('unbanChatId').value;
+            const userId = document.getElementById('unbanUserId').value;
 
             const url = `https://api.telegram.org/bot${token}/unbanChatMember?chat_id=${chatId}&user_id=${userId}`;
+
             await sendRequest(url);
         }
 
@@ -175,6 +237,7 @@
             const messageId = document.getElementById('messageId').value;
 
             const url = `https://api.telegram.org/bot${token}/deleteMessage?chat_id=${chatId}&message_id=${messageId}`;
+
             await sendRequest(url);
         }
 
@@ -185,10 +248,13 @@
 
                 const resultDiv = document.getElementById('result');
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `<strong>Response:</strong><br>${JSON.stringify(data, null, 2)}`;
+                resultDiv.textContent = data.ok
+                    ? "Operation Successful!"
+                    : `Error: ${data.description}`;
             } catch (error) {
-                alert("Error: Unable to process the request.");
-                console.error(error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = `Request Failed: ${error.message}`;
             }
         }
     </script>
