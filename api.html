@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot API Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, button {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f4e4;
+            border: 1px solid #bcd9bc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telegram Bot API Tool</h1>
+    <form id="apiForm">
+        <label for="token">Bot Token:</label>
+        <input type="text" id="token" placeholder="Enter Bot Token" required>
+
+        <label for="chatId">Chat ID:</label>
+        <input type="text" id="chatId" placeholder="Enter Chat ID" required>
+
+        <label for="userId">User ID (if needed):</label>
+        <input type="text" id="userId" placeholder="Enter User ID">
+
+        <label for="action">Select Action:</label>
+        <select id="action" required>
+            <option value="deleteMessage">Delete Message</option>
+            <option value="setAdminTitle">Set Admin Title</option>
+            <option value="promoteUser">Promote User</option>
+            <option value="banUser">Ban User</option>
+            <option value="unbanUser">Unban User</option>
+        </select>
+
+        <label for="messageId">Message ID (if needed):</label>
+        <input type="text" id="messageId" placeholder="Enter Message ID">
+
+        <label for="customTitle">Custom Admin Title (if needed):</label>
+        <input type="text" id="customTitle" placeholder="Enter Admin Title">
+
+        <button type="button" onclick="processAction()">Process</button>
+    </form>
+
+    <div id="result" class="result" style="display:none;"></div>
+
+    <script>
+        async function processAction() {
+            const token = document.getElementById('token').value;
+            const chatId = document.getElementById('chatId').value;
+            const userId = document.getElementById('userId').value;
+            const action = document.getElementById('action').value;
+            const messageId = document.getElementById('messageId').value;
+            const customTitle = document.getElementById('customTitle').value;
+
+            let url = `https://api.telegram.org/bot${token}/`;
+
+            // Construct the URL based on the selected action
+            switch (action) {
+                case "deleteMessage":
+                    url += `deleteMessage?chat_id=${chatId}&message_id=${messageId}`;
+                    break;
+                case "setAdminTitle":
+                    url += `setChatAdministratorCustomTitle?chat_id=${chatId}&user_id=${userId}&custom_title=${encodeURIComponent(customTitle)}`;
+                    break;
+                case "promoteUser":
+                    url += `promoteChatMember?chat_id=${chatId}&user_id=${userId}&can_manage_chat=true&can_delete_messages=true&can_manage_voice_chats=true&can_pin_messages=true&can_restrict_members=true&can_change_info=true&can_promote_members=true&can_invite_users=true`;
+                    break;
+                case "banUser":
+                    url += `banChatMember?chat_id=${chatId}&user_id=${userId}`;
+                    break;
+                case "unbanUser":
+                    url += `unbanChatMember?chat_id=${chatId}&user_id=${userId}`;
+                    break;
+                default:
+                    alert("Invalid action selected");
+                    return;
+            }
+
+            try {
+                // Send the request
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // Display the result
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<strong>Response:</strong><br>${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                alert("Error: Unable to process the request.");
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
