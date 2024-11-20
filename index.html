@@ -23,6 +23,13 @@
             width: 100%;
             box-sizing: border-box;
         }
+        .permissions {
+            margin: 10px 0;
+        }
+        .permissions label {
+            display: inline-block;
+            margin-right: 10px;
+        }
         button {
             background-color: #007BFF;
             color: white;
@@ -38,79 +45,144 @@
             background-color: #e7f4e4;
             border: 1px solid #bcd9bc;
         }
+        .section {
+            margin-bottom: 30px;
+        }
     </style>
 </head>
 <body>
     <h1>Telegram Bot API Tool</h1>
-    <form id="apiForm">
-        <label for="token">Bot Token:</label>
-        <input type="text" id="token" placeholder="Enter Bot Token" required>
 
-        <label for="chatId">Chat ID:</label>
-        <input type="text" id="chatId" placeholder="Enter Chat ID" required>
+    <div class="section">
+        <h2>Promote User with Permissions</h2>
+        <form id="promoteForm">
+            <label for="promoteToken">Bot Token:</label>
+            <input type="text" id="promoteToken" placeholder="Enter Bot Token" required>
 
-        <label for="userId">User ID (if needed):</label>
-        <input type="text" id="userId" placeholder="Enter User ID">
+            <label for="promoteChatId">Chat ID:</label>
+            <input type="text" id="promoteChatId" placeholder="Enter Chat ID" required>
 
-        <label for="action">Select Action:</label>
-        <select id="action" required>
-            <option value="deleteMessage">Delete Message</option>
-            <option value="setAdminTitle">Set Admin Title</option>
-            <option value="promoteUser">Promote User</option>
-            <option value="banUser">Ban User</option>
-            <option value="unbanUser">Unban User</option>
-        </select>
+            <label for="promoteUserId">User ID:</label>
+            <input type="text" id="promoteUserId" placeholder="Enter User ID" required>
 
-        <label for="messageId">Message ID (if needed):</label>
-        <input type="text" id="messageId" placeholder="Enter Message ID">
+            <label>Admin Permissions:</label>
+            <div class="permissions">
+                <label><input type="checkbox" id="manageChat" checked> Manage Chat</label>
+                <label><input type="checkbox" id="deleteMessages" checked> Delete Messages</label>
+                <label><input type="checkbox" id="manageVoiceChats"> Manage Voice Chats</label>
+                <label><input type="checkbox" id="pinMessages"> Pin Messages</label>
+                <label><input type="checkbox" id="restrictMembers" checked> Restrict Members</label>
+                <label><input type="checkbox" id="changeInfo"> Change Info</label>
+                <label><input type="checkbox" id="promoteMembers"> Promote Members</label>
+                <label><input type="checkbox" id="inviteUsers" checked> Invite Users</label>
+                <label><input type="checkbox" id="isAnonymous"> Is Anonymous</label>
+            </div>
 
-        <label for="customTitle">Custom Admin Title (if needed):</label>
-        <input type="text" id="customTitle" placeholder="Enter Admin Title">
+            <label for="customTitle">Custom Admin Title (if needed):</label>
+            <input type="text" id="customTitle" placeholder="Enter Admin Title">
 
-        <button type="button" onclick="processAction()">Process</button>
-    </form>
+            <button type="button" onclick="processPromote()">Promote User</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Ban or Unban User</h2>
+        <form id="banForm">
+            <label for="banToken">Bot Token:</label>
+            <input type="text" id="banToken" placeholder="Enter Bot Token" required>
+
+            <label for="banChatId">Chat ID:</label>
+            <input type="text" id="banChatId" placeholder="Enter Chat ID" required>
+
+            <label for="banUserId">User ID:</label>
+            <input type="text" id="banUserId" placeholder="Enter User ID" required>
+
+            <button type="button" onclick="processBan()">Ban User</button>
+            <button type="button" onclick="processUnban()">Unban User</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Delete a Message</h2>
+        <form id="deleteForm">
+            <label for="deleteToken">Bot Token:</label>
+            <input type="text" id="deleteToken" placeholder="Enter Bot Token" required>
+
+            <label for="deleteChatId">Chat ID:</label>
+            <input type="text" id="deleteChatId" placeholder="Enter Chat ID" required>
+
+            <label for="messageId">Message ID:</label>
+            <input type="text" id="messageId" placeholder="Enter Message ID" required>
+
+            <button type="button" onclick="processDelete()">Delete Message</button>
+        </form>
+    </div>
 
     <div id="result" class="result" style="display:none;"></div>
 
     <script>
-        async function processAction() {
-            const token = document.getElementById('token').value;
-            const chatId = document.getElementById('chatId').value;
-            const userId = document.getElementById('userId').value;
-            const action = document.getElementById('action').value;
-            const messageId = document.getElementById('messageId').value;
+        async function processPromote() {
+            const token = document.getElementById('promoteToken').value;
+            const chatId = document.getElementById('promoteChatId').value;
+            const userId = document.getElementById('promoteUserId').value;
+
+            const permissions = {
+                can_manage_chat: document.getElementById('manageChat').checked,
+                can_delete_messages: document.getElementById('deleteMessages').checked,
+                can_manage_voice_chats: document.getElementById('manageVoiceChats').checked,
+                can_pin_messages: document.getElementById('pinMessages').checked,
+                can_restrict_members: document.getElementById('restrictMembers').checked,
+                can_change_info: document.getElementById('changeInfo').checked,
+                can_promote_members: document.getElementById('promoteMembers').checked,
+                can_invite_users: document.getElementById('inviteUsers').checked,
+                is_anonymous: document.getElementById('isAnonymous').checked
+            };
+
+            let url = `https://api.telegram.org/bot${token}/promoteChatMember?chat_id=${chatId}&user_id=${userId}`;
+            Object.keys(permissions).forEach(key => {
+                url += `&${key}=${permissions[key]}`;
+            });
+
             const customTitle = document.getElementById('customTitle').value;
-
-            let url = `https://api.telegram.org/bot${token}/`;
-
-            // Construct the URL based on the selected action
-            switch (action) {
-                case "deleteMessage":
-                    url += `deleteMessage?chat_id=${chatId}&message_id=${messageId}`;
-                    break;
-                case "setAdminTitle":
-                    url += `setChatAdministratorCustomTitle?chat_id=${chatId}&user_id=${userId}&custom_title=${encodeURIComponent(customTitle)}`;
-                    break;
-                case "promoteUser":
-                    url += `promoteChatMember?chat_id=${chatId}&user_id=${userId}&can_manage_chat=true&can_delete_messages=true&can_manage_voice_chats=true&can_pin_messages=true&can_restrict_members=true&can_change_info=true&can_promote_members=true&can_invite_users=true`;
-                    break;
-                case "banUser":
-                    url += `banChatMember?chat_id=${chatId}&user_id=${userId}`;
-                    break;
-                case "unbanUser":
-                    url += `unbanChatMember?chat_id=${chatId}&user_id=${userId}`;
-                    break;
-                default:
-                    alert("Invalid action selected");
-                    return;
+            if (customTitle) {
+                url += `&custom_title=${encodeURIComponent(customTitle)}`;
             }
 
+            await sendRequest(url);
+        }
+
+        async function processBan() {
+            const token = document.getElementById('banToken').value;
+            const chatId = document.getElementById('banChatId').value;
+            const userId = document.getElementById('banUserId').value;
+
+            const url = `https://api.telegram.org/bot${token}/banChatMember?chat_id=${chatId}&user_id=${userId}`;
+            await sendRequest(url);
+        }
+
+        async function processUnban() {
+            const token = document.getElementById('banToken').value;
+            const chatId = document.getElementById('banChatId').value;
+            const userId = document.getElementById('banUserId').value;
+
+            const url = `https://api.telegram.org/bot${token}/unbanChatMember?chat_id=${chatId}&user_id=${userId}`;
+            await sendRequest(url);
+        }
+
+        async function processDelete() {
+            const token = document.getElementById('deleteToken').value;
+            const chatId = document.getElementById('deleteChatId').value;
+            const messageId = document.getElementById('messageId').value;
+
+            const url = `https://api.telegram.org/bot${token}/deleteMessage?chat_id=${chatId}&message_id=${messageId}`;
+            await sendRequest(url);
+        }
+
+        async function sendRequest(url) {
             try {
-                // Send the request
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // Display the result
                 const resultDiv = document.getElementById('result');
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `<strong>Response:</strong><br>${JSON.stringify(data, null, 2)}`;
